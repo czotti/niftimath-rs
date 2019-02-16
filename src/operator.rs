@@ -5,6 +5,7 @@ pub enum Operator {
     Division,
     Multiplication,
     Substraction,
+    Absolute,
 }
 
 impl FromStr for Operator {
@@ -16,6 +17,7 @@ impl FromStr for Operator {
             "sub" => Ok(Operator::Substraction),
             "mul" => Ok(Operator::Multiplication),
             "div" => Ok(Operator::Division),
+            "abs" => Ok(Operator::Absolute),
             _ => Err(format!("Operator not implemented: {:?}", s)),
         }
     }

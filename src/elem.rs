@@ -1,6 +1,6 @@
 use ndarray::{Array3, Ix3, ScalarOperand};
 use nifti::{DataElement, InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
-use num_traits::AsPrimitive;
+use num_traits::{AsPrimitive, Float};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug)]
@@ -69,6 +69,24 @@ where
             (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs / lhs),
             (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs / rhs),
             (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs / rhs),
+        }
+    }
+}
+
+pub trait Abs {
+    type Output;
+
+    #[must_use]
+    fn abs(self) -> Self::Output;
+}
+
+impl<T: Float> Abs for Elem<T> {
+    type Output = Elem<T>;
+
+    fn abs(self) -> Elem<T> {
+        match self {
+            Elem::Image(image) => Elem::Image(image.mapv(|e| e.abs())),
+            Elem::Value(value) => Elem::Value(value.abs()),
         }
     }
 }

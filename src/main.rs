@@ -5,7 +5,7 @@ mod operator;
 extern crate serde_derive;
 
 use docopt::Docopt;
-use elem::{read_3d_image, read_header, Elem};
+use elem::{read_3d_image, read_header, Abs, Elem};
 use nifti::writer::write_nifti;
 use operator::Operator;
 
@@ -79,6 +79,8 @@ fn main() {
                             let (lhs, rhs) = two_param(&mut stack_data);
                             lhs - rhs
                         }
+                        // Ok(Operator::Absolute) => Abs::abs(stack_data.pop().unwrap()),
+                        Ok(Operator::Absolute) => stack_data.pop().unwrap().abs(),
                         Err(e) => panic!(e),
                     }
                 };
