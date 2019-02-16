@@ -92,5 +92,5 @@ fn main() {
     };
 
     let header = header.unwrap();
-    write_nifti("test_output.nii.gz", &image, Some(&header)).expect("Failed to save the image.");
+    write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
 }
