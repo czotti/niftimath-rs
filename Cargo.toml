@@ -1,0 +1,13 @@
+[package]
+name = "niftimath"
+version = "0.1.0"
+authors = ["clement"]
+edition = "2018"
+
+[dependencies]
+docopt = "1.0"
+ndarray = "0.12"
+nifti = { git = "https://github.com/enet4/nifti-rs", features = ["ndarray_volumes"] }
+num-traits = "0.2"
+serde = "1.0"
+serde_derive = "1.0"
