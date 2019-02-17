@@ -12,7 +12,7 @@ Binary operation (Mul, Div, Sub, Add)
 ```
 niftimath 1.0 t1.nii.gz mul 3 6.1 add mul output.nii.gz
 ```
-This correspond to the following operation:
+This correspond to the following formula:
 ```
 output.nii.gz = (1.0 * t1.nii.gz) * (3 + 6.1)
 ```
