@@ -32,7 +32,7 @@ Options:
   -h --help             Show this screen.
 ";
 
-fn two_param<T>(stack: &mut Vec<Elem<T>>) -> (Elem<T>, Elem<T>) {
+fn two_param(stack: &mut Vec<Elem>) -> (Elem, Elem) {
     let rhs = stack.pop().expect("Missing parameters lhs.");
     let lhs = stack.pop().expect("Missing parameters rhs.");
     (lhs, rhs)
@@ -79,7 +79,6 @@ fn main() {
                             let (lhs, rhs) = two_param(&mut stack_data);
                             lhs - rhs
                         }
-                        // Ok(Operator::Absolute) => Abs::abs(stack_data.pop().unwrap()),
                         Ok(Operator::Absolute) => stack_data.pop().unwrap().abs(),
                         Err(e) => panic!(e),
                     }
