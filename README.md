@@ -28,19 +28,23 @@ output.nii.gz = abs(5.0 - t1.nii.gz) * 10
 
 ## Operations
 
-### Binary Operation
-- [X] Addition (add)
-- [X] Subtraction (sub)
-- [X] Multiplication (mul)
-- [X] Division (div)
-### Unary Opetation
-- [ ] Minimum (min), between images will be a min voxel wise.
-- [ ] Maximum (max), between images will be a max voxel wise.
-- [X] Absolute (abs), voxel wise
+### Binary Operations
+- [X] Addition (add).
+- [X] Subtraction (sub).
+- [X] Multiplication (mul).
+- [X] Division (div).
+- [ ] Minimum (min), between images will be a min voxels wise.
+- [ ] Maximum (max), between images will be a max voxels wise.
 
-### Reduce operation
-- [ ] Mean (mean), compute the mean of all the voxel of the image
-- [ ] Standard deviation (std), compute the std of all the voxel of the image.
+### Unary Operations
+- [X] Absolute (abs), voxels wise.
+- [ ] Implement unary [operations](https://doc.rust-lang.org/std/primitive.f64.html), voxels wise.
 
-### Output operation
-- [ ] Add possibility to save as a desired nifti type (u8, u16, f32, f64, ...)
+### Reduce operations
+- [ ] Minimum (min_reduce), extract minimum value of an image.
+- [ ] Maximum (max_reduce), extract maximum value of an image.
+- [ ] Mean (mean_reduce), compute the mean of all the voxels of the image.
+- [ ] Standard deviation (std_reduce), compute the std of all the voxels of the image.
+
+### Output operations
+- [ ] Add possibility to save as a desired nifti type (u8, u16, f32, f64, ...).
