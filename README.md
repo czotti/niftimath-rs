@@ -48,3 +48,6 @@ output.nii.gz = abs(5.0 - t1.nii.gz) * 10
 
 ### Output operations
 - [ ] Add possibility to save as a desired nifti type (u8, u16, f32, f64, ...).
+
+### Features
+- [ ] parallel iteration for some operations (ndarray-parallel).
