@@ -1,74 +1,50 @@
-use ndarray::{Array3, Ix3, ScalarOperand};
+use ndarray::{Array3, Ix3};
 use nifti::{DataElement, InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
 use num_traits::AsPrimitive;
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug)]
-pub enum Elem<T> {
-    Image(Array3<T>),
-    Value(T),
+pub enum Elem {
+    Image(Array3<f64>),
+    Value(f64),
 }
 
-impl<T> Add for Elem<T>
-where
-    T: ScalarOperand + Add<Output = T>,
-{
-    type Output = Elem<T>;
-
-    fn add(self, other: Elem<T>) -> Elem<T> {
-        match (self, other) {
-            (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs + rhs),
-            (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs + lhs),
-            (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs + rhs),
-            (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs + rhs),
+macro_rules! bin_operation {
+    ($trait:ty, $fct_name:ident, $op:tt) => {
+        impl $trait for Elem
+        {
+            type Output = Elem;
+            fn $fct_name(self, other: Self::Output) -> Self::Output {
+                match (self, other) {
+                    (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs $op rhs),
+                    (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs $op lhs),
+                    (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs $op rhs),
+                    (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs $op rhs),
+                }
+            }
         }
     }
 }
 
-impl<T> Sub for Elem<T>
-where
-    T: ScalarOperand + Sub<Output = T>,
-{
-    type Output = Elem<T>;
+bin_operation!(Add, add, +);
+bin_operation!(Sub, sub, -);
+bin_operation!(Mul, mul, *);
+bin_operation!(Div, div, /);
 
-    fn sub(self, other: Elem<T>) -> Elem<T> {
-        match (self, other) {
-            (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs - rhs),
-            (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs - lhs),
-            (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs - rhs),
-            (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs - rhs),
-        }
-    }
+pub trait Abs {
+    type Output;
+
+    #[must_use]
+    fn abs(self) -> Self::Output;
 }
 
-impl<T> Mul for Elem<T>
-where
-    T: ScalarOperand + Mul<Output = T>,
-{
-    type Output = Elem<T>;
+impl Abs for Elem {
+    type Output = Elem;
 
-    fn mul(self, other: Elem<T>) -> Elem<T> {
-        match (self, other) {
-            (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs * rhs),
-            (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs * lhs),
-            (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs * rhs),
-            (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs * rhs),
-        }
-    }
-}
-
-impl<T> Div for Elem<T>
-where
-    T: ScalarOperand + Div<Output = T>,
-{
-    type Output = Elem<T>;
-
-    fn div(self, other: Elem<T>) -> Elem<T> {
-        match (self, other) {
-            (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs / rhs),
-            (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs / lhs),
-            (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs / rhs),
-            (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs / rhs),
+    fn abs(self) -> Elem {
+        match self {
+            Elem::Image(image) => Elem::Image(image.mapv_into(f64::abs)),
+            Elem::Value(value) => Elem::Value(value.abs()),
         }
     }
 }
