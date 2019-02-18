@@ -43,7 +43,7 @@ impl Abs for Elem {
 
     fn abs(self) -> Elem {
         match self {
-            Elem::Image(image) => Elem::Image(image.mapv(f64::abs)),
+            Elem::Image(image) => Elem::Image(image.mapv_into(f64::abs)),
             Elem::Value(value) => Elem::Value(value.abs()),
         }
     }
