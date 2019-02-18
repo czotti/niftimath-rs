@@ -37,8 +37,14 @@ output.nii.gz = abs(5.0 - t1.nii.gz) * 10
 - [ ] Maximum (max), between images will be a max voxels wise.
 
 ### Unary Operations
-- [X] Absolute (abs), voxels wise.
 - [ ] Implement unary [operations](https://doc.rust-lang.org/std/primitive.f64.html), voxels wise.
+    - [X] Absolute (abs), voxels wise.
+    - [X] Floor, Ceil, Round.
+    - [X] Sqrt, Cbrt.
+    - [X] Exp, Exp2, Ln, Log2, Log10.
+    - [X] Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh.
+    - [ ] LogN.
+    - [ ] Powi, Powf.
 
 ### Reduce operations
 - [ ] Minimum (min_reduce), extract minimum value of an image.
