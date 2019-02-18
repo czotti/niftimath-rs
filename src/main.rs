@@ -5,7 +5,7 @@ mod operator;
 extern crate serde_derive;
 
 use docopt::Docopt;
-use elem::{read_3d_image, read_header, Abs, Elem};
+use elem::*;
 use nifti::writer::write_nifti;
 use operator::Operator;
 
@@ -80,6 +80,25 @@ fn main() {
                             lhs - rhs
                         }
                         Ok(Operator::Absolute) => stack_data.pop().unwrap().abs(),
+                        Ok(Operator::Floor) => stack_data.pop().unwrap().floor(),
+                        Ok(Operator::Ceil) => stack_data.pop().unwrap().ceil(),
+                        Ok(Operator::Round) => stack_data.pop().unwrap().round(),
+                        Ok(Operator::Sqrt) => stack_data.pop().unwrap().sqrt(),
+                        Ok(Operator::Cbrt) => stack_data.pop().unwrap().cbrt(),
+                        Ok(Operator::Exp) => stack_data.pop().unwrap().exp(),
+                        Ok(Operator::Exp2) => stack_data.pop().unwrap().exp2(),
+                        Ok(Operator::Ln) => stack_data.pop().unwrap().ln(),
+                        Ok(Operator::Log2) => stack_data.pop().unwrap().log2(),
+                        Ok(Operator::Log10) => stack_data.pop().unwrap().log10(),
+                        Ok(Operator::Sin) => stack_data.pop().unwrap().sin(),
+                        Ok(Operator::Cos) => stack_data.pop().unwrap().cos(),
+                        Ok(Operator::Tan) => stack_data.pop().unwrap().tan(),
+                        Ok(Operator::Asin) => stack_data.pop().unwrap().asin(),
+                        Ok(Operator::Acos) => stack_data.pop().unwrap().acos(),
+                        Ok(Operator::Atan) => stack_data.pop().unwrap().atan(),
+                        Ok(Operator::Sinh) => stack_data.pop().unwrap().sinh(),
+                        Ok(Operator::Cosh) => stack_data.pop().unwrap().cosh(),
+                        Ok(Operator::Tanh) => stack_data.pop().unwrap().tanh(),
                         Err(e) => panic!(e),
                     }
                 };
