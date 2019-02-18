@@ -1,6 +1,8 @@
 use std::str::FromStr;
 
-pub enum Operator {
+pub enum Formula {
+    Image(String),
+    Value(f64),
     Addition,
     Division,
     Multiplication,
@@ -27,36 +29,42 @@ pub enum Operator {
     Tanh,
 }
 
-impl FromStr for Operator {
+impl FromStr for Formula {
     type Err = String;
 
-    fn from_str(s: &str) -> Result<Operator, String> {
+    fn from_str(s: &str) -> Result<Formula, String> {
         match s {
-            "add" => Ok(Operator::Addition),
-            "sub" => Ok(Operator::Substraction),
-            "mul" => Ok(Operator::Multiplication),
-            "div" => Ok(Operator::Division),
-            "abs" => Ok(Operator::Absolute),
-            "floor" => Ok(Operator::Floor),
-            "ceil" => Ok(Operator::Ceil),
-            "round" => Ok(Operator::Round),
-            "sqrt" => Ok(Operator::Sqrt),
-            "cbrt" => Ok(Operator::Cbrt),
-            "exp" => Ok(Operator::Exp),
-            "exp2" => Ok(Operator::Exp2),
-            "ln" => Ok(Operator::Ln),
-            "log2" => Ok(Operator::Log2),
-            "log10" => Ok(Operator::Log10),
-            "sin" => Ok(Operator::Sin),
-            "cos" => Ok(Operator::Cos),
-            "tan" => Ok(Operator::Tan),
-            "asin" => Ok(Operator::Asin),
-            "acos" => Ok(Operator::Acos),
-            "atan" => Ok(Operator::Atan),
-            "sinh" => Ok(Operator::Sinh),
-            "cosh" => Ok(Operator::Cosh),
-            "tanh" => Ok(Operator::Tanh),
-            _ => Err(format!("Operator not implemented: {:?}", s)),
+            image if image.ends_with(".nii.gz") || image.ends_with(".nii") => {
+                Ok(Formula::Image(image.to_string()))
+            }
+            value if value.parse::<f64>().is_ok() => {
+                Ok(Formula::Value(value.parse::<f64>().unwrap()))
+            }
+            "add" => Ok(Formula::Addition),
+            "sub" => Ok(Formula::Substraction),
+            "mul" => Ok(Formula::Multiplication),
+            "div" => Ok(Formula::Division),
+            "abs" => Ok(Formula::Absolute),
+            "floor" => Ok(Formula::Floor),
+            "ceil" => Ok(Formula::Ceil),
+            "round" => Ok(Formula::Round),
+            "sqrt" => Ok(Formula::Sqrt),
+            "cbrt" => Ok(Formula::Cbrt),
+            "exp" => Ok(Formula::Exp),
+            "exp2" => Ok(Formula::Exp2),
+            "ln" => Ok(Formula::Ln),
+            "log2" => Ok(Formula::Log2),
+            "log10" => Ok(Formula::Log10),
+            "sin" => Ok(Formula::Sin),
+            "cos" => Ok(Formula::Cos),
+            "tan" => Ok(Formula::Tan),
+            "asin" => Ok(Formula::Asin),
+            "acos" => Ok(Formula::Acos),
+            "atan" => Ok(Formula::Atan),
+            "sinh" => Ok(Formula::Sinh),
+            "cosh" => Ok(Formula::Cosh),
+            "tanh" => Ok(Formula::Tanh),
+            _ => Err(format!("Formula not implemented: {:?}", s)),
         }
     }
 }
