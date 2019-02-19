@@ -35,7 +35,6 @@ macro_rules! unary_operation {
     ($trait:ident, $fct_name:ident, $op:path) => {
         pub trait $trait {
             type Output;
-            #[must_use]
             fn $fct_name(self) -> Self::Output;
         }
 
