@@ -20,11 +20,33 @@ Informations:
   Example of command line usage, 
   niftimath t1.nii.gz 1.5 mul 0.3 add output.nii.gz
 
-Dual operations:
+Binary operations (voxel wise for images):
   add   Addition take two operand
   div   Division take two operand
   mul   Multiplication take two operand
   sub   Substraction take two operand
+
+Unary operations (voxel wise for images):
+  abs
+  floor
+  ceil
+  round
+  sqrt
+  cbrt
+  exp
+  exp2
+  ln
+  log2
+  log10
+  sin
+  cos
+  tan
+  asin
+  acos
+  atan
+  sinh
+  cosh
+  tanh
 
 Options:
   -d --datatype         Define in which datatype to save the result.
