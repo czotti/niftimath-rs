@@ -5,9 +5,9 @@ mod operator;
 extern crate serde_derive;
 
 use docopt::Docopt;
-use elem::{read_3d_image, read_header, Abs, Elem};
+use elem::*;
 use nifti::writer::write_nifti;
-use operator::Operator;
+use operator::Formula;
 
 const USAGE: &'static str = "
 Nifti math chaining mathematical operation defined in reverse polish notation.
@@ -20,11 +20,33 @@ Informations:
   Example of command line usage, 
   niftimath t1.nii.gz 1.5 mul 0.3 add output.nii.gz
 
-Dual operations:
+Binary operations (voxel wise for images):
   add   Addition take two operand
   div   Division take two operand
   mul   Multiplication take two operand
   sub   Substraction take two operand
+
+Unary operations (voxel wise for images):
+  abs
+  floor
+  ceil
+  round
+  sqrt
+  cbrt
+  exp
+  exp2
+  ln
+  log2
+  log10
+  sin
+  cos
+  tan
+  asin
+  acos
+  atan
+  sinh
+  cosh
+  tanh
 
 Options:
   -d --datatype         Define in which datatype to save the result.
@@ -45,7 +67,6 @@ struct Args {
 }
 
 fn main() {
-    // let mut args: Vec<String> = env::args().collect();
     let args: Args = Docopt::new(USAGE)
         .and_then(|dopt| dopt.deserialize())
         .unwrap_or_else(|e| e.exit());
@@ -53,39 +74,53 @@ fn main() {
     println!("{:?}", args);
     let mut stack_data = vec![];
     for elem in args.arg_elems {
-        match elem.parse::<f64>() {
-            Ok(value) => stack_data.push(Elem::Value(value)),
-            Err(_) => {
-                let result = if elem.ends_with(".nii.gz") || elem.ends_with(".nii") {
-                    if header.is_none() {
-                        header = Some(read_header(&elem));
-                    }
-                    Elem::Image(read_3d_image(&elem))
-                } else {
-                    match elem.parse() {
-                        Ok(Operator::Addition) => {
-                            let (lhs, rhs) = two_param(&mut stack_data);
-                            lhs + rhs
-                        }
-                        Ok(Operator::Division) => {
-                            let (lhs, rhs) = two_param(&mut stack_data);
-                            lhs / rhs
-                        }
-                        Ok(Operator::Multiplication) => {
-                            let (lhs, rhs) = two_param(&mut stack_data);
-                            lhs * rhs
-                        }
-                        Ok(Operator::Substraction) => {
-                            let (lhs, rhs) = two_param(&mut stack_data);
-                            lhs - rhs
-                        }
-                        Ok(Operator::Absolute) => stack_data.pop().unwrap().abs(),
-                        Err(e) => panic!(e),
-                    }
-                };
-                stack_data.push(result);
+        let result = match elem.parse() {
+            Ok(Formula::Value(value)) => Elem::Value(value),
+            Ok(Formula::Image(image)) => {
+                if header.is_none() {
+                    header = Some(read_header(&image));
+                }
+                Elem::Image(read_3d_image(&image))
             }
-        }
+            Ok(Formula::Addition) => {
+                let (lhs, rhs) = two_param(&mut stack_data);
+                lhs + rhs
+            }
+            Ok(Formula::Division) => {
+                let (lhs, rhs) = two_param(&mut stack_data);
+                lhs / rhs
+            }
+            Ok(Formula::Multiplication) => {
+                let (lhs, rhs) = two_param(&mut stack_data);
+                lhs * rhs
+            }
+            Ok(Formula::Substraction) => {
+                let (lhs, rhs) = two_param(&mut stack_data);
+                lhs - rhs
+            }
+            Ok(Formula::Absolute) => stack_data.pop().unwrap().abs(),
+            Ok(Formula::Floor) => stack_data.pop().unwrap().floor(),
+            Ok(Formula::Ceil) => stack_data.pop().unwrap().ceil(),
+            Ok(Formula::Round) => stack_data.pop().unwrap().round(),
+            Ok(Formula::Sqrt) => stack_data.pop().unwrap().sqrt(),
+            Ok(Formula::Cbrt) => stack_data.pop().unwrap().cbrt(),
+            Ok(Formula::Exp) => stack_data.pop().unwrap().exp(),
+            Ok(Formula::Exp2) => stack_data.pop().unwrap().exp2(),
+            Ok(Formula::Ln) => stack_data.pop().unwrap().ln(),
+            Ok(Formula::Log2) => stack_data.pop().unwrap().log2(),
+            Ok(Formula::Log10) => stack_data.pop().unwrap().log10(),
+            Ok(Formula::Sin) => stack_data.pop().unwrap().sin(),
+            Ok(Formula::Cos) => stack_data.pop().unwrap().cos(),
+            Ok(Formula::Tan) => stack_data.pop().unwrap().tan(),
+            Ok(Formula::Asin) => stack_data.pop().unwrap().asin(),
+            Ok(Formula::Acos) => stack_data.pop().unwrap().acos(),
+            Ok(Formula::Atan) => stack_data.pop().unwrap().atan(),
+            Ok(Formula::Sinh) => stack_data.pop().unwrap().sinh(),
+            Ok(Formula::Cosh) => stack_data.pop().unwrap().cosh(),
+            Ok(Formula::Tanh) => stack_data.pop().unwrap().tanh(),
+            Err(e) => panic!(e),
+        };
+        stack_data.push(result);
     }
     let image = match stack_data.pop().unwrap() {
         Elem::Image(image) => image,
