@@ -49,7 +49,7 @@ Unary operations (voxel wise for images):
   tanh
 
 Save types:
-    u8, i8, u16, i16, u32, i32, u64, i64, f32
+    u8, i8, u16, i16, u32, i32, u64, i64, f32, f64
 
 Options:
   -d --datatype=<d>     Define in which datatype to save the result [default: f64].
