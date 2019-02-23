@@ -48,6 +48,9 @@ Unary operations (voxel wise for images):
   cosh
   tanh
 
+Save types:
+    u8, i8, u16, i16, u32, i32, u64, i64, f32
+
 Options:
   -d --datatype=<d>     Define in which datatype to save the result [default: f64].
   -t --nb_thread=<t>    Use <t> cores to compute the math operation [default: 1].
@@ -129,42 +132,47 @@ fn main() {
     };
 
     let header = header.unwrap();
+    let error_convert = "Failed to save the image.";
     match args.flag_datatype.as_ref() {
         "u8" => {
-            let image = image.mapv(|e| e as u8);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as u8);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "i8" => {
-            let image = image.mapv(|e| e as i8);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as i8);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "u16" => {
-            let image = image.mapv(|e| e as u16);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as u16);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "i16" => {
-            let image = image.mapv(|e| e as i16);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as i16);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "u32" => {
-            let image = image.mapv(|e| e as u32);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as u32);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "i32" => {
-            let image = image.mapv(|e| e as i32);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as i32);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "i64" => {
-            let image = image.mapv(|e| e as i64);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            let image = image.mapv(|e| e.round() as i64);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
+        }
+        "u64" => {
+            let image = image.mapv(|e| e.round() as u64);
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "f32" => {
             let image = image.mapv(|e| e as f32);
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
         "f64" => {
-            write_nifti(args.arg_output, &image, Some(&header)).expect("Failed to save the image.");
+            write_nifti(args.arg_output, &image, Some(&header)).expect(error_convert);
         }
-        _ => panic!("Unsupported type.")
+        _ => panic!("Unsupported type."),
     }
 }
