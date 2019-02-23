@@ -1,5 +1,6 @@
 mod elem;
 mod operator;
+mod utils;
 
 #[macro_use]
 extern crate serde_derive;
@@ -8,6 +9,7 @@ use docopt::Docopt;
 use elem::*;
 use nifti::writer::write_nifti;
 use operator::Formula;
+use utils::set_threading;
 
 const USAGE: &'static str = "
 Nifti math chaining mathematical operation defined in reverse polish notation.
@@ -53,7 +55,7 @@ Save types:
 
 Options:
   -d --datatype=<d>     Define in which datatype to save the result [default: f64].
-  -t --nb_thread=<t>    Use <t> cores to compute the math operation [default: 1].
+  -t --num-thread=<t>   Use <t> cores to compute the math operation [default: 1].
   -h --help             Show this screen.
 ";
 
@@ -68,12 +70,14 @@ struct Args {
     arg_output: String,
     arg_elems: Vec<String>,
     flag_datatype: String,
+    flag_num_thread: usize,
 }
 
 fn main() {
     let args: Args = Docopt::new(USAGE)
         .and_then(|dopt| dopt.deserialize())
         .unwrap_or_else(|e| e.exit());
+    set_threading(args.flag_num_thread);
     let mut header = None;
     println!("{:?}", args);
     let mut stack_data = vec![];

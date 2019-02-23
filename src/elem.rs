@@ -1,4 +1,5 @@
 use ndarray::{Array3, Ix3};
+use ndarray_parallel::{par_azip, prelude::*};
 use nifti::{DataElement, InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
 use num_traits::AsPrimitive;
 use std::ops::{Add, Div, Mul, Sub};
@@ -16,7 +17,12 @@ macro_rules! bin_operation {
             type Output = Elem;
             fn $fct_name(self, other: Self::Output) -> Self::Output {
                 match (self, other) {
-                    (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs $op rhs),
+                    (Elem::Image(mut lhs), Elem::Image(rhs)) => {
+                        par_azip!(mut lhs, rhs in {
+                            *lhs = *lhs $op rhs
+                        });
+                        Elem::Image(lhs)
+                    },
                     (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs $op lhs),
                     (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs $op rhs),
                     (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs $op rhs),
@@ -42,7 +48,10 @@ macro_rules! unary_operation {
             type Output = Elem;
             fn $fct_name(self) -> Elem {
                 match self {
-                    Elem::Image(image) => Elem::Image(image.mapv_into($op)),
+                    Elem::Image(mut image) => {
+                        image.par_mapv_inplace($op);
+                        Elem::Image(image)
+                    }
                     Elem::Value(value) => Elem::Value($op(value)),
                 }
             }
