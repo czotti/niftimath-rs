@@ -2,14 +2,12 @@ mod elem;
 mod operator;
 mod utils;
 
-#[macro_use]
-extern crate serde_derive;
-
 use docopt::Docopt;
 use elem::*;
 use nifti::writer::write_nifti;
 use operator::Formula;
-use utils::set_threading;
+use serde_derive::Deserialize;
+use utils::{read_header, read_nd_image, set_threading};
 
 const USAGE: &'static str = "
 Nifti math chaining mathematical operation defined in reverse polish notation.
@@ -88,7 +86,7 @@ fn main() {
                 if header.is_none() {
                     header = Some(read_header(&image));
                 }
-                Elem::Image(read_3d_image(&image))
+                Elem::Image(read_nd_image(image))
             }
             Ok(Formula::Addition) => {
                 let (lhs, rhs) = two_param(&mut stack_data);

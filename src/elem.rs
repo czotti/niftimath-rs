@@ -1,11 +1,10 @@
-use ndarray::{Array3, Ix3};
+use ndarray::{Array, IxDyn};
 use ndarray_parallel::{par_azip, prelude::*};
-use nifti::{InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug)]
 pub enum Elem {
-    Image(Array3<f64>),
+    Image(Array<f64, IxDyn>),
     Value(f64),
 }
 
@@ -84,15 +83,3 @@ unary_operation!(Atan, atan, f64::atan);
 unary_operation!(Sinh, sinh, f64::sinh);
 unary_operation!(Cosh, cosh, f64::cosh);
 unary_operation!(Tanh, tanh, f64::tanh);
-
-pub fn read_3d_image(path: &str) -> Array3<f64> {
-    let nifti_object = InMemNiftiObject::from_file(path).expect("Nifti file is unreadable.");
-    let volume = nifti_object.into_volume();
-    let dyn_data = volume.into_ndarray::<f64>().unwrap();
-    dyn_data.into_dimensionality::<Ix3>().unwrap()
-}
-
-pub fn read_header(path: &str) -> NiftiHeader {
-    let nifti_object = InMemNiftiObject::from_file(path).expect("Nifti file in unreadable.");
-    nifti_object.header().clone()
-}
