@@ -23,8 +23,14 @@ macro_rules! bin_operation {
                         });
                         Elem::Image(lhs)
                     },
-                    (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs $op lhs),
-                    (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs $op rhs),
+                    (Elem::Value(lhs), Elem::Image(mut rhs)) => {
+                        rhs.par_map_inplace(|e| *e = *e $op lhs);
+                        Elem::Image(rhs)
+                    },
+                    (Elem::Image(mut lhs), Elem::Value(rhs)) => {
+                        lhs.par_map_inplace(|e| *e = *e $op rhs);
+                        Elem::Image(lhs)
+                    },
                     (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs $op rhs),
                 }
             }
