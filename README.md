@@ -53,7 +53,7 @@ output.nii.gz = abs(5.0 - t1.nii.gz) * 10
 - [ ] Standard deviation (std_reduce), compute the std of all the voxels of the image.
 
 ### Output operations
-- [ ] Add possibility to save as a desired nifti type (u8, u16, f32, f64, ...).
+- [X] Add possibility to save as a desired nifti type (u8, u16, f32, f64, ...).
 
 ### Features
 - [ ] parallel iteration for some operations (ndarray-parallel).
