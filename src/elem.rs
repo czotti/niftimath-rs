@@ -1,7 +1,6 @@
 use ndarray::{Array3, Ix3};
 use ndarray_parallel::{par_azip, prelude::*};
-use nifti::{DataElement, InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
-use num_traits::AsPrimitive;
+use nifti::{InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug)]
@@ -86,25 +85,10 @@ unary_operation!(Sinh, sinh, f64::sinh);
 unary_operation!(Cosh, cosh, f64::cosh);
 unary_operation!(Tanh, tanh, f64::tanh);
 
-pub fn read_3d_image<T>(path: &str) -> Array3<T>
-where
-    T: Mul<Output = T>,
-    T: Add<Output = T>,
-    T: DataElement,
-    u8: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-    u16: AsPrimitive<T>,
-    i16: AsPrimitive<T>,
-    u32: AsPrimitive<T>,
-    i32: AsPrimitive<T>,
-    u64: AsPrimitive<T>,
-    i64: AsPrimitive<T>,
-    f32: AsPrimitive<T>,
-    f64: AsPrimitive<T>,
-{
+pub fn read_3d_image(path: &str) -> Array3<f64> {
     let nifti_object = InMemNiftiObject::from_file(path).expect("Nifti file is unreadable.");
     let volume = nifti_object.into_volume();
-    let dyn_data = volume.into_ndarray::<T>().unwrap();
+    let dyn_data = volume.into_ndarray::<f64>().unwrap();
     dyn_data.into_dimensionality::<Ix3>().unwrap()
 }
 
