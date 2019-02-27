@@ -18,29 +18,32 @@ macro_rules! bin_operation {
                 match (self, other) {
                     (Elem::Image(mut lhs), Elem::Image(rhs)) => {
                         par_azip!(mut lhs, rhs in {
-                            *lhs = *lhs $op rhs
+                            *lhs $op rhs
                         });
                         Elem::Image(lhs)
                     },
                     (Elem::Value(lhs), Elem::Image(mut rhs)) => {
-                        rhs.par_map_inplace(|e| *e = *e $op lhs);
+                        rhs.par_map_inplace(|e| *e $op lhs);
                         Elem::Image(rhs)
                     },
                     (Elem::Image(mut lhs), Elem::Value(rhs)) => {
-                        lhs.par_map_inplace(|e| *e = *e $op rhs);
+                        lhs.par_map_inplace(|e| *e $op rhs);
                         Elem::Image(lhs)
                     },
-                    (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs $op rhs),
+                    (Elem::Value(mut lhs), Elem::Value(rhs)) => {
+                        lhs $op rhs;
+                        Elem::Value(lhs)
+                    },
                 }
             }
         }
     }
 }
 
-bin_operation!(Add, add, +);
-bin_operation!(Sub, sub, -);
-bin_operation!(Mul, mul, *);
-bin_operation!(Div, div, /);
+bin_operation!(Add, add, +=);
+bin_operation!(Sub, sub, -=);
+bin_operation!(Mul, mul, *=);
+bin_operation!(Div, div, /=);
 
 macro_rules! unary_operation {
     ($trait:ident, $fct_name:ident, $op:path) => {
