@@ -53,7 +53,7 @@ Save types:
 
 Options:
   -d --datatype=<d>     Define in which datatype to save the result [default: f64].
-  -t --num-thread=<t>   Use <t> cores to compute the math operation [default: 1].
+  -t --threads=<t>   Use <t> cores to compute the math operation [default: 1].
   -h --help             Show this screen.
 ";
 
@@ -68,14 +68,14 @@ struct Args {
     arg_output: String,
     arg_elems: Vec<String>,
     flag_datatype: String,
-    flag_num_thread: usize,
+    flag_threads: usize,
 }
 
 fn main() {
     let args: Args = Docopt::new(USAGE)
         .and_then(|dopt| dopt.deserialize())
         .unwrap_or_else(|e| e.exit());
-    set_threading(args.flag_num_thread);
+    set_threading(args.flag_threads);
     let mut header = None;
     println!("{:?}", args);
     let mut stack_data = vec![];
