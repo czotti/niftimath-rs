@@ -1,6 +1,6 @@
 use ndarray::{Array3, Ix3};
-use nifti::{DataElement, InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
-use num_traits::AsPrimitive;
+use ndarray_parallel::{par_azip, prelude::*};
+use nifti::{InMemNiftiObject, IntoNdArray, NiftiHeader, NiftiObject};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug)]
@@ -16,20 +16,34 @@ macro_rules! bin_operation {
             type Output = Elem;
             fn $fct_name(self, other: Self::Output) -> Self::Output {
                 match (self, other) {
-                    (Elem::Image(lhs), Elem::Image(rhs)) => Elem::Image(lhs $op rhs),
-                    (Elem::Value(lhs), Elem::Image(rhs)) => Elem::Image(rhs $op lhs),
-                    (Elem::Image(lhs), Elem::Value(rhs)) => Elem::Image(lhs $op rhs),
-                    (Elem::Value(lhs), Elem::Value(rhs)) => Elem::Value(lhs $op rhs),
+                    (Elem::Image(mut lhs), Elem::Image(rhs)) => {
+                        par_azip!(mut lhs, rhs in {
+                            *lhs $op rhs
+                        });
+                        Elem::Image(lhs)
+                    },
+                    (Elem::Value(lhs), Elem::Image(mut rhs)) => {
+                        rhs.par_map_inplace(|e| *e $op lhs);
+                        Elem::Image(rhs)
+                    },
+                    (Elem::Image(mut lhs), Elem::Value(rhs)) => {
+                        lhs.par_map_inplace(|e| *e $op rhs);
+                        Elem::Image(lhs)
+                    },
+                    (Elem::Value(mut lhs), Elem::Value(rhs)) => {
+                        lhs $op rhs;
+                        Elem::Value(lhs)
+                    },
                 }
             }
         }
     }
 }
 
-bin_operation!(Add, add, +);
-bin_operation!(Sub, sub, -);
-bin_operation!(Mul, mul, *);
-bin_operation!(Div, div, /);
+bin_operation!(Add, add, +=);
+bin_operation!(Sub, sub, -=);
+bin_operation!(Mul, mul, *=);
+bin_operation!(Div, div, /=);
 
 macro_rules! unary_operation {
     ($trait:ident, $fct_name:ident, $op:path) => {
@@ -42,7 +56,10 @@ macro_rules! unary_operation {
             type Output = Elem;
             fn $fct_name(self) -> Elem {
                 match self {
-                    Elem::Image(image) => Elem::Image(image.mapv_into($op)),
+                    Elem::Image(mut image) => {
+                        image.par_mapv_inplace($op);
+                        Elem::Image(image)
+                    }
                     Elem::Value(value) => Elem::Value($op(value)),
                 }
             }
@@ -71,25 +88,10 @@ unary_operation!(Sinh, sinh, f64::sinh);
 unary_operation!(Cosh, cosh, f64::cosh);
 unary_operation!(Tanh, tanh, f64::tanh);
 
-pub fn read_3d_image<T>(path: &str) -> Array3<T>
-where
-    T: Mul<Output = T>,
-    T: Add<Output = T>,
-    T: DataElement,
-    u8: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-    u16: AsPrimitive<T>,
-    i16: AsPrimitive<T>,
-    u32: AsPrimitive<T>,
-    i32: AsPrimitive<T>,
-    u64: AsPrimitive<T>,
-    i64: AsPrimitive<T>,
-    f32: AsPrimitive<T>,
-    f64: AsPrimitive<T>,
-{
+pub fn read_3d_image(path: &str) -> Array3<f64> {
     let nifti_object = InMemNiftiObject::from_file(path).expect("Nifti file is unreadable.");
     let volume = nifti_object.into_volume();
-    let dyn_data = volume.into_ndarray::<T>().unwrap();
+    let dyn_data = volume.into_ndarray::<f64>().unwrap();
     dyn_data.into_dimensionality::<Ix3>().unwrap()
 }
 
