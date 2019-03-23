@@ -83,7 +83,7 @@ fn main() {
     for elem in args.arg_elems.iter() {
         match elem.parse() {
             Ok(Formula::Image(image_path)) => {
-                if ccache.has_key(image_path.clone()) {
+                if ccache.contains_key(&image_path) {
                     ccache.increment(&image_path, 1);
                 } else {
                     if header.is_none() {

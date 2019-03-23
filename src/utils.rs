@@ -16,6 +16,5 @@ pub fn read_nd_image(path: String) -> Array<f64, IxDyn> {
 }
 
 pub fn read_header(path: &str) -> NiftiHeader {
-    let nifti_object = InMemNiftiObject::from_file(path).expect("Nifti file in unreadable.");
-    nifti_object.header().clone()
+    NiftiHeader::from_file(path).expect("Nifti file in unreadable.")
 }
