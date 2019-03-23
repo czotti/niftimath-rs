@@ -2,6 +2,7 @@ mod elem;
 mod operator;
 mod utils;
 
+use count_cache::CountCache;
 use docopt::Docopt;
 use elem::*;
 use nifti::writer::write_nifti;
@@ -76,17 +77,31 @@ fn main() {
         .and_then(|dopt| dopt.deserialize())
         .unwrap_or_else(|e| e.exit());
     set_threading(args.flag_threads);
+
     let mut header = None;
+    let mut ccache = CountCache::new();
+    for elem in args.arg_elems.iter() {
+        match elem.parse() {
+            Ok(Formula::Image(image_path)) => {
+                if ccache.has_key(image_path.clone()) {
+                    ccache.increment(&image_path, 1);
+                } else {
+                    if header.is_none() {
+                        header = Some(read_header(&image_path));
+                    }
+                    ccache.insert(image_path.clone(), read_nd_image(image_path), 1)
+                }
+            }
+            _ => (),
+        }
+    }
     println!("{:?}", args);
     let mut stack_data = vec![];
     for elem in args.arg_elems {
         let result = match elem.parse() {
             Ok(Formula::Value(value)) => Elem::Value(value),
             Ok(Formula::Image(image)) => {
-                if header.is_none() {
-                    header = Some(read_header(&image));
-                }
-                Elem::Image(read_nd_image(image))
+                Elem::Image(ccache.get(&image).expect("Failing to retrive image"))
             }
             Ok(Formula::Addition) => {
                 let (lhs, rhs) = two_param(&mut stack_data);

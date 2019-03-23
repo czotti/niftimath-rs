@@ -5,7 +5,7 @@ authors = ["clement"]
 edition = "2018"
 
 [dependencies]
-cached = "0.8"
+count_cache = "0.1"
 docopt = "1.0"
 ndarray = "0.12"
 ndarray-parallel = "0.9"
