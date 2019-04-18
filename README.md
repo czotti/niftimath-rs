@@ -56,4 +56,5 @@ output.nii.gz = abs(5.0 - t1.nii.gz) * 10
 - [X] Add possibility to save as a desired nifti type (u8, u16, f32, f64, ...).
 
 ### Features
-- [ ] parallel iteration for some operations (ndarray-parallel).
+- [X] Parallel iteration for some operations (ndarray-parallel).
+- [X] Cache for input image to now reload it every time.
