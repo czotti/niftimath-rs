@@ -101,7 +101,7 @@ fn main() {
         let result = match elem.parse() {
             Ok(Formula::Value(value)) => Elem::Value(value),
             Ok(Formula::Image(image)) => {
-                Elem::Image(ccache.get(&image).expect("Failing to retrive image"))
+                Elem::Image(ccache.get(&image).expect("Failing to retrieve image"))
             }
             Ok(Formula::Addition) => {
                 let (lhs, rhs) = two_param(&mut stack_data);
