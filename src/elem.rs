@@ -16,7 +16,7 @@ macro_rules! bin_operation {
             fn $fct_name(self, other: Self::Output) -> Self::Output {
                 match (self, other) {
                     (Elem::Image(mut lhs), Elem::Image(rhs)) => {
-                        par_azip!(mut lhs, rhs in {
+                        par_azip!((lhs in &mut lhs, rhsin &rhs) {
                             *lhs $op rhs
                         });
                         Elem::Image(lhs)
