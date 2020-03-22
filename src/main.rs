@@ -139,6 +139,11 @@ fn main() {
             Ok(Formula::Sinh) => stack_data.pop().unwrap().sinh(),
             Ok(Formula::Cosh) => stack_data.pop().unwrap().cosh(),
             Ok(Formula::Tanh) => stack_data.pop().unwrap().tanh(),
+            Ok(Formula::ReduceMin) => stack_data.pop().unwrap().tanh(),
+            Ok(Formula::ReduceMax) => stack_data.pop().unwrap().tanh(),
+            Ok(Formula::ReduceMean) => stack_data.pop().unwrap().tanh(),
+            Ok(Formula::ReduceMedian) => stack_data.pop().unwrap().tanh(),
+            Ok(Formula::ReduceStd) => stack_data.pop().unwrap().tanh(),
             Err(e) => panic!(e),
         };
         stack_data.push(result);

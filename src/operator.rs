@@ -27,6 +27,12 @@ pub enum Formula {
     Sinh,
     Cosh,
     Tanh,
+    // Reduce operation
+    ReduceMin,
+    ReduceMax,
+    ReduceMean,
+    ReduceStd,
+    ReduceMedian,
 }
 
 impl FromStr for Formula {
@@ -64,6 +70,11 @@ impl FromStr for Formula {
             "sinh" => Ok(Formula::Sinh),
             "cosh" => Ok(Formula::Cosh),
             "tanh" => Ok(Formula::Tanh),
+            "reduce_mean" => Ok(Formula::ReduceMean),
+            "reduce_median" => Ok(Formula::ReduceMedian),
+            "reduce_std" => Ok(Formula::ReduceStd),
+            "reduce_min" => Ok(Formula::ReduceMin),
+            "reduce_max" => Ok(Formula::ReduceMax),
             _ => Err(format!("Formula not implemented: {:?}", s)),
         }
     }
