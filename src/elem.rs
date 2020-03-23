@@ -1,5 +1,4 @@
-use ndarray::{Array, IxDyn};
-use ndarray_parallel::{par_azip, prelude::*};
+use ndarray::{parallel::par_azip, Array, IxDyn};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug)]
@@ -8,7 +7,7 @@ pub enum Elem {
     Value(f64),
 }
 
-macro_rules! bin_operation {
+macro_rules! dyadic_operation {
     ($trait:ty, $fct_name:ident, $op:tt) => {
         impl $trait for Elem
         {
@@ -16,9 +15,7 @@ macro_rules! bin_operation {
             fn $fct_name(self, other: Self::Output) -> Self::Output {
                 match (self, other) {
                     (Elem::Image(mut lhs), Elem::Image(rhs)) => {
-                        par_azip!(mut lhs, rhs in {
-                            *lhs $op rhs
-                        });
+                        par_azip!((lhs in &mut lhs, &rhs in &rhs) { *lhs $op rhs });
                         Elem::Image(lhs)
                     },
                     (Elem::Value(lhs), Elem::Image(mut rhs)) => {
@@ -39,10 +36,10 @@ macro_rules! bin_operation {
     }
 }
 
-bin_operation!(Add, add, +=);
-bin_operation!(Sub, sub, -=);
-bin_operation!(Mul, mul, *=);
-bin_operation!(Div, div, /=);
+dyadic_operation!(Add, add, +=);
+dyadic_operation!(Sub, sub, -=);
+dyadic_operation!(Mul, mul, *=);
+dyadic_operation!(Div, div, /=);
 
 macro_rules! unary_operation {
     ($trait:ident, $fct_name:ident, $op:path) => {
