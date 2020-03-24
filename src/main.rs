@@ -1,14 +1,12 @@
-mod elem;
 mod operator;
 mod utils;
 
-use count_cache::CountCache;
 use docopt::Docopt;
-use elem::*;
 use nifti::writer::write_nifti;
-use operator::Formula;
+use operator::*;
 use serde_derive::Deserialize;
-use utils::{read_header, read_nd_image, set_threading};
+use std::collections::HashMap;
+use utils::{read_header, set_threading};
 
 const USAGE: &'static str = "
 Nifti math chaining mathematical operation defined in reverse polish notation.
@@ -58,12 +56,6 @@ Options:
   -h --help             Show this screen.
 ";
 
-fn two_param(stack: &mut Vec<Elem>) -> (Elem, Elem) {
-    let rhs = stack.pop().expect("Missing parameters lhs.");
-    let lhs = stack.pop().expect("Missing parameters rhs.");
-    (lhs, rhs)
-}
-
 #[derive(Debug, Deserialize)]
 struct Args {
     arg_output: String,
@@ -78,78 +70,22 @@ fn main() {
         .unwrap_or_else(|e| e.exit());
     set_threading(args.flag_threads);
 
-    let mut header = None;
-    let mut ccache = CountCache::new();
-    for elem in args.arg_elems.iter() {
-        match elem.parse() {
-            Ok(Formula::Image(image_path)) => {
-                if ccache.contains_key(&image_path) {
-                    ccache.increment(&image_path, 1);
-                } else {
-                    if header.is_none() {
-                        header = Some(read_header(&image_path));
-                    }
-                    ccache.insert(image_path.clone(), read_nd_image(image_path), 1)
-                }
-            }
-            _ => (),
-        }
-    }
+    let mut ccache = HashMap::new();
     println!("{:?}", args);
     let mut stack_data = vec![];
+    let mut header = None;
     for elem in args.arg_elems {
-        let result = match elem.parse() {
-            Ok(Formula::Value(value)) => Elem::Value(value),
-            Ok(Formula::Image(image)) => {
-                Elem::Image(ccache.get(&image).expect("Failing to retrieve image"))
-            }
-            Ok(Formula::Addition) => {
-                let (lhs, rhs) = two_param(&mut stack_data);
-                lhs + rhs
-            }
-            Ok(Formula::Division) => {
-                let (lhs, rhs) = two_param(&mut stack_data);
-                lhs / rhs
-            }
-            Ok(Formula::Multiplication) => {
-                let (lhs, rhs) = two_param(&mut stack_data);
-                lhs * rhs
-            }
-            Ok(Formula::Substraction) => {
-                let (lhs, rhs) = two_param(&mut stack_data);
-                lhs - rhs
-            }
-            Ok(Formula::Absolute) => stack_data.pop().unwrap().abs(),
-            Ok(Formula::Floor) => stack_data.pop().unwrap().floor(),
-            Ok(Formula::Ceil) => stack_data.pop().unwrap().ceil(),
-            Ok(Formula::Round) => stack_data.pop().unwrap().round(),
-            Ok(Formula::Sqrt) => stack_data.pop().unwrap().sqrt(),
-            Ok(Formula::Cbrt) => stack_data.pop().unwrap().cbrt(),
-            Ok(Formula::Exp) => stack_data.pop().unwrap().exp(),
-            Ok(Formula::Exp2) => stack_data.pop().unwrap().exp2(),
-            Ok(Formula::Ln) => stack_data.pop().unwrap().ln(),
-            Ok(Formula::Log2) => stack_data.pop().unwrap().log2(),
-            Ok(Formula::Log10) => stack_data.pop().unwrap().log10(),
-            Ok(Formula::Sin) => stack_data.pop().unwrap().sin(),
-            Ok(Formula::Cos) => stack_data.pop().unwrap().cos(),
-            Ok(Formula::Tan) => stack_data.pop().unwrap().tan(),
-            Ok(Formula::Asin) => stack_data.pop().unwrap().asin(),
-            Ok(Formula::Acos) => stack_data.pop().unwrap().acos(),
-            Ok(Formula::Atan) => stack_data.pop().unwrap().atan(),
-            Ok(Formula::Sinh) => stack_data.pop().unwrap().sinh(),
-            Ok(Formula::Cosh) => stack_data.pop().unwrap().cosh(),
-            Ok(Formula::Tanh) => stack_data.pop().unwrap().tanh(),
-            Ok(Formula::ReduceMin) => stack_data.pop().unwrap().tanh(),
-            Ok(Formula::ReduceMax) => stack_data.pop().unwrap().tanh(),
-            Ok(Formula::ReduceMean) => stack_data.pop().unwrap().tanh(),
-            Ok(Formula::ReduceMedian) => stack_data.pop().unwrap().tanh(),
-            Ok(Formula::ReduceStd) => stack_data.pop().unwrap().tanh(),
-            Err(e) => panic!(e),
-        };
+        if header.is_none() && elem.ends_with(".nii.gz") || elem.ends_with(".nii") {
+            header = Some(read_header(&elem));
+        }
+        let result = elem
+            .parse::<Formula>()
+            .unwrap()
+            .apply(&mut stack_data, &mut ccache);
         stack_data.push(result);
     }
     let image = match stack_data.pop().unwrap() {
-        Elem::Image(image) => image,
+        Formula::Image(image) => image,
         _ => panic!("The latest computed value is not an image."),
     };
 
