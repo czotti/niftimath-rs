@@ -5,9 +5,9 @@ authors = ["clement"]
 edition = "2018"
 
 [dependencies]
-count_cache = "0.1"
+approx = "0.3"
 docopt = "1.1"
-ndarray = { version = "0.13", features = ["rayon"] }
+ndarray = { version = "0.13", features = ["rayon", "approx"] }
 nifti = { version = "0.9", features = ["ndarray_volumes"] }
 rayon = "1.3"
 serde = "1.0"
