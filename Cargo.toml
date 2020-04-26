@@ -1,6 +1,6 @@
 [package]
 name = "niftimath"
-version = "0.1.0"
+version = "0.2020.3"
 authors = ["clement"]
 edition = "2018"
 
