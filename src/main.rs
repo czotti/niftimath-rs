@@ -46,6 +46,9 @@ Unary operations (voxel wise for images):
   sinh
   cosh
   tanh
+  min
+  max
+  sum
 
 Save types:
     u8, i8, u16, i16, u32, i32, u64, i64, f32, f64
@@ -86,7 +89,11 @@ fn main() {
     }
     let image = match stack_data.pop().unwrap() {
         Formula::Image(image) => image,
-        _ => panic!("The latest computed value is not an image."),
+        Formula::Value(value) => {
+            println!("Results is {:?}.", value);
+            std::process::exit(0)
+        }
+        _ => panic!("Unsupported output check your formula."),
     };
 
     let header = header.unwrap();

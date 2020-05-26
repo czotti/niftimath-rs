@@ -1,6 +1,7 @@
 use crate::utils::{extract_volume, read_nifti};
 use approx::abs_diff_eq;
 use ndarray::{parallel::par_azip, Array, IxDyn};
+use ndarray_stats::QuantileExt;
 use nifti::InMemNiftiObject;
 use std::collections::HashMap;
 use std::ops::{Add, Div, Mul, Sub};
@@ -35,12 +36,9 @@ pub enum Formula {
     Sinh,
     Cosh,
     Tanh,
-    // Reduce operation
-    // ReduceMin,
-    // ReduceMax,
-    // ReduceMean,
-    // ReduceStd,
-    // ReduceMedian,
+    Min,
+    Max,
+    Sum,
 }
 
 impl FromStr for Formula {
@@ -78,6 +76,9 @@ impl FromStr for Formula {
             "sinh" => Ok(Formula::Sinh),
             "cosh" => Ok(Formula::Cosh),
             "tanh" => Ok(Formula::Tanh),
+            "min" => Ok(Formula::Min),
+            "max" => Ok(Formula::Max),
+            "sum" => Ok(Formula::Sum),
             // "reduce_mean" => Ok(Formula::ReduceMean),
             // "reduce_median" => Ok(Formula::ReduceMedian),
             // "reduce_std" => Ok(Formula::ReduceStd),
@@ -158,11 +159,9 @@ impl Formula {
             Formula::Sinh => stack.pop().unwrap().sinh(),
             Formula::Cosh => stack.pop().unwrap().cosh(),
             Formula::Tanh => stack.pop().unwrap().tanh(),
-            // Formula::ReduceMin => stack.pop().unwrap().tanh(),
-            // Formula::ReduceMax => stack.pop().unwrap().tanh(),
-            // Formula::ReduceMean => stack.pop().unwrap().tanh(),
-            // Formula::ReduceMedian => stack.pop().unwrap().tanh(),
-            // Formula::ReduceStd => stack.pop().unwrap().tanh(),
+            Formula::Min => stack.pop().unwrap().min(),
+            Formula::Max => stack.pop().unwrap().max(),
+            Formula::Sum => stack.pop().unwrap().sum(),
         }
     }
 }
@@ -210,7 +209,48 @@ apply_unary!(Sinh, sinh, f64::sinh);
 apply_unary!(Cosh, cosh, f64::cosh);
 apply_unary!(Tanh, tanh, f64::tanh);
 
-macro_rules! apply_dyadic {
+macro_rules! apply_unary_fct {
+    ($trait:ident, $fct_name:ident, $op:tt) => {
+        pub trait $trait {
+            type Output;
+            fn $fct_name(self) -> Self::Output;
+        }
+        impl $trait for Formula {
+            type Output = Formula;
+            fn $fct_name(self) -> Formula {
+                match self {
+                    Formula::Image(image) => Formula::Value(*image.$op().unwrap()),
+                    _ => panic!("Should not be called!"),
+                }
+            }
+        }
+    };
+}
+
+apply_unary_fct!(Min, min, min);
+apply_unary_fct!(Max, max, max);
+
+macro_rules! apply_unary_fct_stats {
+    ($trait:ident, $fct_name:ident, $op:tt) => {
+        pub trait $trait {
+            type Output;
+            fn $fct_name(self) -> Self::Output;
+        }
+        impl $trait for Formula {
+            type Output = Formula;
+            fn $fct_name(self) -> Formula {
+                match self {
+                    Formula::Image(image) => Formula::Value(image.$op()),
+                    _ => panic!("Should not be called!"),
+                }
+            }
+        }
+    };
+}
+
+apply_unary_fct_stats!(Sum, sum, sum);
+
+macro_rules! apply_dyadic_op {
     ($trait:ty, $fct_name:ident, $op:tt) => {
         impl $trait for Formula
         {
@@ -241,10 +281,10 @@ macro_rules! apply_dyadic {
     }
 }
 
-apply_dyadic!(Add, add, +=);
-apply_dyadic!(Sub, sub, -=);
-apply_dyadic!(Mul, mul, *=);
-apply_dyadic!(Div, div, /=);
+apply_dyadic_op!(Add, add, +=);
+apply_dyadic_op!(Sub, sub, -=);
+apply_dyadic_op!(Mul, mul, *=);
+apply_dyadic_op!(Div, div, /=);
 
 #[cfg(test)]
 mod tests {
